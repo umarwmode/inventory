@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WeCafe — Inventory Tracker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f7f6f2;
+    --surface: #ffffff;
+    --surface2: #f0ede6;
+    --border: #e2ddd6;
+    --text: #1a1816;
+    --text-muted: #7a746c;
+    --text-light: #b0a99f;
+    --accent: #1a1816;
+    --ok: #2d6a4f;
+    --ok-bg: #e8f5ee;
+    --warn: #7d4e00;
+    --warn-bg: #fff3cd;
+    --danger: #9b1d1d;
+    --danger-bg: #fce8e8;
+    --radius: 10px;
+    --radius-sm: 6px;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    font-size: 14px;
+  }
+
+  /* ── Header ── */
+  header {
+    background: var(--accent);
+    color: #fff;
+    padding: 0 2rem;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 50;
+  }
+  .brand { display: flex; align-items: center; gap: 12px; }
+  .brand-icon {
+    width: 32px; height: 32px;
+    background: rgba(255,255,255,0.12);
+    border-radius: var(--radius-sm);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px;
+  }
+  .brand-name { font-size: 16px; font-weight: 600; letter-spacing: -.3px; }
+  .brand-tag { font-size: 11px; opacity: .5; font-weight: 300; margin-left: 2px; }
+  .header-date { font-size: 12px; opacity: .45; font-family: 'DM Mono', monospace; }
+
+  /* ── Main layout ── */
+  main { max-width: 1100px; margin: 0 auto; padding: 2rem 1.5rem 4rem; }
+
+  /* ── Stats row ── */
+  .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 2rem; }
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.1rem 1.25rem;
+  }
+  .stat-label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: .6px; margin-bottom: 6px; }
+  .stat-val { font-size: 28px; font-weight: 600; letter-spacing: -1px; line-height: 1; }
+  .stat-val.warn { color: var(--warn); }
+  .stat-val.danger { color: var(--danger); }
+  .stat-sub { font-size: 11px; color: var(--text-light); margin-top: 4px; }
+
+  /* ── Toolbar ── */
+  .toolbar {
+    display: flex; gap: 10px; margin-bottom: 1rem;
+    flex-wrap: wrap; align-items: center;
+  }
+  .search-wrap { position: relative; flex: 1; min-width: 200px; }
+  .search-wrap svg { position: absolute; left: 11px; top: 50%; transform: translateY(-50%); opacity: .35; pointer-events: none; }
+  .search-wrap input {
+    width: 100%; height: 38px; padding: 0 12px 0 36px;
+    border: 1px solid var(--border); border-radius: var(--radius-sm);
+    background: var(--surface); font-family: 'DM Sans', sans-serif;
+    font-size: 13px; color: var(--text); outline: none;
+    transition: border-color .15s;
+  }
+  .search-wrap input:focus { border-color: var(--accent); }
+  select {
+    height: 38px; padding: 0 12px; border: 1px solid var(--border);
+    border-radius: var(--radius-sm); background: var(--surface);
+    font-family: 'DM Sans', sans-serif; font-size: 13px;
+    color: var(--text); outline: none; cursor: pointer;
+    transition: border-color .15s;
+  }
+  select:focus { border-color: var(--accent); }
+  .toolbar-right { display: flex; gap: 8px; margin-left: auto; }
+  .btn-ghost {
+    height: 38px; padding: 0 14px;
+    border: 1px solid var(--border); border-radius: var(--radius-sm);
+    background: var(--surface); font-family: 'DM Sans', sans-serif;
+    font-size: 13px; color: var(--text); cursor: pointer;
+    display: flex; align-items: center; gap: 6px;
+    transition: background .15s, border-color .15s;
+  }
+  .btn-ghost:hover { background: var(--surface2); border-color: #ccc; }
+
+  /* ── Table ── */
+  .table-wrap {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+  }
+  table { width: 100%; border-collapse: collapse; }
+  thead tr { background: var(--surface2); }
+  th {
+    padding: 11px 14px; text-align: left;
+    font-size: 11px; font-weight: 600; color: var(--text-muted);
+    text-transform: uppercase; letter-spacing: .6px;
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+  }
+  th.num, td.num { text-align: right; }
+  td {
+    padding: 12px 14px; border-bottom: 1px solid var(--border);
+    color: var(--text); vertical-align: middle;
+    font-size: 13px;
+  }
+  tbody tr:last-child td { border-bottom: none; }
+  tbody tr { transition: background .1s; }
+  tbody tr:hover { background: #faf9f6; }
+  .item-name { font-weight: 500; font-size: 13px; }
+  .item-model { font-size: 11px; color: var(--text-light); font-family: 'DM Mono', monospace; margin-top: 2px; }
+  .stock-num { font-family: 'DM Mono', monospace; font-weight: 500; }
+  .stock-num.low { color: var(--warn); }
+  .stock-num.out { color: var(--danger); }
+
+  /* ── Badges ── */
+  .badge {
+    display: inline-block; font-size: 11px; font-weight: 500;
+    padding: 3px 9px; border-radius: 20px; white-space: nowrap;
+  }
+  .badge-ok { background: var(--ok-bg); color: var(--ok); }
+  .badge-warn { background: var(--warn-bg); color: var(--warn); }
+  .badge-danger { background: var(--danger-bg); color: var(--danger); }
+
+  /* ── Use button ── */
+  .use-btn {
+    height: 30px; padding: 0 12px;
+    border: 1px solid var(--border); border-radius: var(--radius-sm);
+    background: transparent; font-family: 'DM Sans', sans-serif;
+    font-size: 12px; color: var(--text); cursor: pointer;
+    display: inline-flex; align-items: center; gap: 5px;
+    transition: background .12s, border-color .12s;
+    white-space: nowrap;
+  }
+  .use-btn:hover:not(:disabled) { background: var(--surface2); border-color: #bbb; }
+  .use-btn:disabled { opacity: .35; cursor: not-allowed; }
+  .use-btn svg { flex-shrink: 0; }
+
+  /* ── Empty ── */
+  .empty { padding: 3rem; text-align: center; color: var(--text-muted); font-size: 13px; }
+  .empty-icon { font-size: 28px; margin-bottom: 8px; opacity: .3; }
+
+  /* ── Progress bar ── */
+  .progress-wrap { width: 80px; height: 4px; background: var(--surface2); border-radius: 4px; overflow: hidden; display: inline-block; vertical-align: middle; }
+  .progress-bar { height: 100%; border-radius: 4px; transition: width .3s; }
+  .progress-bar.ok { background: var(--ok); }
+  .progress-bar.warn { background: #e9a000; }
+  .progress-bar.danger { background: var(--danger); }
+
+  /* ── Modal ── */
+  .modal-overlay {
+    display: none; position: fixed; inset: 0;
+    background: rgba(26,24,22,.55); z-index: 200;
+    align-items: center; justify-content: center;
+    backdrop-filter: blur(2px);
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    background: var(--surface); border-radius: 14px;
+    border: 1px solid var(--border);
+    padding: 1.75rem; width: 400px; max-width: 92vw;
+    box-shadow: 0 20px 60px rgba(0,0,0,.15);
+    animation: popIn .18s ease;
+  }
+  @keyframes popIn { from { transform: scale(.95); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+  .modal-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 1.25rem; }
+  .modal-title { font-size: 15px; font-weight: 600; line-height: 1.3; }
+  .modal-sub { font-size: 12px; color: var(--text-muted); margin-top: 3px; }
+  .modal-close {
+    width: 28px; height: 28px; border: none; background: var(--surface2);
+    border-radius: 50%; cursor: pointer; display: flex; align-items: center;
+    justify-content: center; flex-shrink: 0; font-size: 16px; color: var(--text-muted);
+    transition: background .12s;
+  }
+  .modal-close:hover { background: var(--border); }
+  .field-label { font-size: 12px; font-weight: 500; color: var(--text-muted); margin-bottom: 6px; display: block; }
+  .modal input[type=number] {
+    width: 100%; height: 44px; padding: 0 14px;
+    border: 1.5px solid var(--border); border-radius: var(--radius-sm);
+    font-family: 'DM Mono', monospace; font-size: 18px; font-weight: 500;
+    color: var(--text); background: var(--bg); outline: none;
+    transition: border-color .15s;
+  }
+  .modal input[type=number]:focus { border-color: var(--accent); background: var(--surface); }
+  .field-hint { font-size: 11px; color: var(--text-light); margin-top: 5px; }
+  .field-error { font-size: 11px; color: var(--danger); margin-top: 5px; display: none; }
+  .modal-actions { display: flex; gap: 8px; margin-top: 1.5rem; justify-content: flex-end; }
+  .btn-cancel {
+    height: 40px; padding: 0 18px; border: 1px solid var(--border);
+    border-radius: var(--radius-sm); background: transparent;
+    font-family: 'DM Sans', sans-serif; font-size: 13px; color: var(--text);
+    cursor: pointer; transition: background .12s;
+  }
+  .btn-cancel:hover { background: var(--surface2); }
+  .btn-confirm {
+    height: 40px; padding: 0 22px; border: none;
+    border-radius: var(--radius-sm); background: var(--accent);
+    font-family: 'DM Sans', sans-serif; font-size: 13px; color: #fff;
+    cursor: pointer; font-weight: 500; transition: opacity .12s;
+  }
+  .btn-confirm:hover { opacity: .85; }
+
+  /* ── Toast ── */
+  .toast {
+    position: fixed; bottom: 1.5rem; left: 50%; transform: translateX(-50%);
+    background: var(--accent); color: #fff; font-size: 13px; font-family: 'DM Sans', sans-serif;
+    padding: 10px 20px; border-radius: 20px;
+    opacity: 0; transition: opacity .25s, transform .25s;
+    pointer-events: none; z-index: 300; white-space: nowrap;
+    transform: translateX(-50%) translateY(10px);
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  /* ── Log panel ── */
+  .log-panel {
+    margin-top: 2rem; background: var(--surface);
+    border: 1px solid var(--border); border-radius: var(--radius);
+    overflow: hidden; display: none;
+  }
+  .log-panel.open { display: block; }
+  .log-header {
+    padding: 12px 16px; background: var(--surface2);
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .log-title { font-size: 12px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: .6px; }
+  .log-clear { font-size: 11px; color: var(--danger); cursor: pointer; background: none; border: none; font-family: 'DM Sans', sans-serif; }
+  .log-clear:hover { text-decoration: underline; }
+  .log-row {
+    display: flex; align-items: center; gap: 12px;
+    padding: 10px 16px; border-bottom: 1px solid var(--border);
+    font-size: 12px;
+  }
+  .log-row:last-child { border-bottom: none; }
+  .log-time { color: var(--text-light); font-family: 'DM Mono', monospace; flex-shrink: 0; }
+  .log-item { color: var(--text); flex: 1; }
+  .log-qty { font-family: 'DM Mono', monospace; font-weight: 500; color: var(--danger); flex-shrink: 0; }
+  .log-empty { padding: 1.5rem; text-align: center; color: var(--text-light); font-size: 12px; }
+
+  @media (max-width: 700px) {
+    .stats { grid-template-columns: repeat(2, 1fr); }
+    th.hide-m, td.hide-m { display: none; }
+    main { padding: 1rem 1rem 3rem; }
+    header { padding: 0 1rem; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand">
+    <div class="brand-icon">☕</div>
+    <div>
+      <span class="brand-name">WeCafe</span>
+      <span class="brand-tag">/ Inventory</span>
+    </div>
+  </div>
+  <div class="header-date" id="header-date"></div>
+</header>
+
+<main>
+  <div class="stats">
+    <div class="stat-card">
+      <div class="stat-label">Total SKUs</div>
+      <div class="stat-val" id="s-skus">—</div>
+      <div class="stat-sub">product lines</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">In Stock</div>
+      <div class="stat-val" id="s-stock">—</div>
+      <div class="stat-sub">total units</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Reorder Soon</div>
+      <div class="stat-val warn" id="s-reorder">—</div>
+      <div class="stat-sub">items low</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Out of Stock</div>
+      <div class="stat-val danger" id="s-out">—</div>
+      <div class="stat-sub">items empty</div>
+    </div>
+  </div>
+
+  <div class="toolbar">
+    <div class="search-wrap">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      <input type="text" id="search" placeholder="Search items…" oninput="render()">
+    </div>
+    <select id="cat-filter" onchange="render()">
+      <option value="">All categories</option>
+      <option>Cups</option><option>Lids</option><option>Bags</option>
+      <option>Bowls</option><option>Boxes</option><option>Cans</option><option>Equipment</option>
+    </select>
+    <select id="status-filter" onchange="render()">
+      <option value="">All statuses</option>
+      <option>OK</option><option>Reorder Now</option><option>Out of Stock</option>
+    </select>
+    <div class="toolbar-right">
+      <button class="btn-ghost" onclick="toggleLog()">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+        Usage Log
+      </button>
+      <button class="btn-ghost" onclick="resetData()">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.61"/></svg>
+        Reset
+      </button>
+    </div>
+  </div>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Item</th>
+          <th class="hide-m">Category</th>
+          <th class="num">Received</th>
+          <th class="num">Used</th>
+          <th class="num">In Stock</th>
+          <th class="hide-m">Level</th>
+          <th>Status</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody id="tbody"></tbody>
+    </table>
+  </div>
+
+  <div class="log-panel" id="log-panel">
+    <div class="log-header">
+      <span class="log-title">Usage Log</span>
+      <button class="log-clear" onclick="clearLog()">Clear log</button>
+    </div>
+    <div id="log-body"></div>
+  </div>
+</main>
+
+<!-- Modal -->
+<div class="modal-overlay" id="modal-overlay">
+  <div class="modal">
+    <div class="modal-header">
+      <div>
+        <div class="modal-title" id="modal-title">Record usage</div>
+        <div class="modal-sub" id="modal-sub"></div>
+      </div>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <label class="field-label" for="modal-qty">Quantity used / sold</label>
+    <input type="number" id="modal-qty" min="1" placeholder="0" oninput="validateQty()">
+    <div class="field-hint" id="field-hint"></div>
+    <div class="field-error" id="field-error">Cannot exceed current stock</div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal()">Cancel</button>
+      <button class="btn-confirm" onclick="confirmUse()">Confirm</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const DEFAULT_ITEMS = [
+  {id:1,  model:"12oz",          desc:"Double Wall Paper Cup",          cat:"Cups",      recv:14000, used:0, reorder:1400},
+  {id:2,  model:"16oz",          desc:"Double Wall Paper Cup",          cat:"Cups",      recv:17000, used:0, reorder:1700},
+  {id:3,  model:"90mm",          desc:"PLA Compostable Lid",            cat:"Lids",      recv:31000, used:0, reorder:3100},
+  {id:4,  model:"12oz",          desc:"PET Plastic Cup",                cat:"Cups",      recv:10000, used:0, reorder:1000},
+  {id:5,  model:"16oz",          desc:"PET Plastic Cup",                cat:"Cups",      recv:5000,  used:0, reorder:500},
+  {id:6,  model:"92mm",          desc:"Strawless Lid",                  cat:"Lids",      recv:10000, used:0, reorder:1000},
+  {id:7,  model:"98mm",          desc:"Strawless Lid",                  cat:"Lids",      recv:10000, used:0, reorder:1000},
+  {id:8,  model:"29×25.5×13cm",  desc:"Paper Bag",                      cat:"Bags",      recv:9000,  used:0, reorder:900},
+  {id:9,  model:"12oz",          desc:"Paper Bowl",                     cat:"Bowls",     recv:10000, used:0, reorder:1000},
+  {id:10, model:"98mm",          desc:"Dome Lid for 12oz Paper Bowl",   cat:"Lids",      recv:9900,  used:0, reorder:990},
+  {id:11, model:"17.3×10×6cm",   desc:"Brownie Box (Inside & Outside)", cat:"Boxes",     recv:9900,  used:0, reorder:990},
+  {id:12, model:"12×11.5cm",     desc:"Croffle Box (Inside & Outside)", cat:"Boxes",     recv:9700,  used:0, reorder:970},
+  {id:13, model:"27×14×6cm",     desc:"Paper Box with Cup Holder",      cat:"Boxes",     recv:20000, used:0, reorder:2000},
+  {id:14, model:"350ml",         desc:"PET Plastic Can",                cat:"Cans",      recv:10000, used:0, reorder:1000},
+  {id:15, model:"220×400×600mm", desc:"Can Sealing Machine",            cat:"Equipment", recv:1,     used:0, reorder:1},
+];
+
+let items = [], log = [], activeId = null;
+const KEY_INV = 'wecafe_inv_v1', KEY_LOG = 'wecafe_log_v1';
+
+function load() {
+  try { items = JSON.parse(localStorage.getItem(KEY_INV)) || JSON.parse(JSON.stringify(DEFAULT_ITEMS)); } 
+  catch(e) { items = JSON.parse(JSON.stringify(DEFAULT_ITEMS)); }
+  try { log = JSON.parse(localStorage.getItem(KEY_LOG)) || []; } 
+  catch(e) { log = []; }
+}
+function save() {
+  localStorage.setItem(KEY_INV, JSON.stringify(items));
+  localStorage.setItem(KEY_LOG, JSON.stringify(log));
+}
+function status(item) {
+  const s = item.recv - item.used;
+  if (s <= 0) return 'Out of Stock';
+  if (s <= item.reorder) return 'Reorder Now';
+  return 'OK';
+}
+function fmt(n) { return Number(n).toLocaleString('en-CA'); }
+function pct(item) { return Math.max(0, Math.min(100, Math.round((item.recv - item.used) / item.recv * 100))); }
+
+function updateStats() {
+  const statuses = items.map(status);
+  document.getElementById('s-skus').textContent    = items.length;
+  document.getElementById('s-stock').textContent   = fmt(items.reduce((a,x) => a + Math.max(0, x.recv - x.used), 0));
+  document.getElementById('s-reorder').textContent = statuses.filter(s => s === 'Reorder Now').length;
+  document.getElementById('s-out').textContent     = statuses.filter(s => s === 'Out of Stock').length;
+}
+
+function render() {
+  const q   = document.getElementById('search').value.toLowerCase();
+  const cat = document.getElementById('cat-filter').value;
+  const sf  = document.getElementById('status-filter').value;
+  const filtered = items.filter(x => {
+    const s = status(x);
+    return (!q  || x.desc.toLowerCase().includes(q) || x.model.toLowerCase().includes(q) || x.cat.toLowerCase().includes(q))
+        && (!cat || x.cat === cat)
+        && (!sf  || s === sf);
+  });
+  const tbody = document.getElementById('tbody');
+  if (!filtered.length) {
+    tbody.innerHTML = '<tr><td colspan="8"><div class="empty"><div class="empty-icon">📭</div>No items match your filters</div></td></tr>';
+    updateStats(); return;
+  }
+  tbody.innerHTML = filtered.map(x => {
+    const st  = status(x);
+    const stk = Math.max(0, x.recv - x.used);
+    const p   = pct(x);
+    const stClass = st === 'OK' ? 'ok' : st === 'Reorder Now' ? 'warn' : 'danger';
+    const bdgClass = st === 'OK' ? 'badge-ok' : st === 'Reorder Now' ? 'badge-warn' : 'badge-danger';
+    const numClass = st === 'OK' ? '' : st === 'Reorder Now' ? 'low' : 'out';
+    return `<tr>
+      <td>
+        <div class="item-name">${x.desc}</div>
+        <div class="item-model">${x.model}</div>
+      </td>
+      <td class="hide-m" style="color:var(--text-muted);font-size:12px">${x.cat}</td>
+      <td class="num" style="font-family:'DM Mono',monospace;color:var(--text-muted)">${fmt(x.recv)}</td>
+      <td class="num" style="font-family:'DM Mono',monospace;color:var(--text-muted)">${fmt(x.used)}</td>
+      <td class="num"><span class="stock-num ${numClass}">${fmt(stk)}</span></td>
+      <td class="hide-m">
+        <div class="progress-wrap">
+          <div class="progress-bar ${stClass}" style="width:${p}%"></div>
+        </div>
+      </td>
+      <td><span class="badge ${bdgClass}">${st}</span></td>
+      <td>
+        <button class="use-btn" onclick="openModal(${x.id})" ${stk <= 0 ? 'disabled' : ''}>
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Use
+        </button>
+      </td>
+    </tr>`;
+  }).join('');
+  updateStats();
+}
+
+function openModal(id) {
+  activeId = id;
+  const item = items.find(x => x.id === id);
+  const stk  = item.recv - item.used;
+  document.getElementById('modal-title').textContent = item.desc;
+  document.getElementById('modal-sub').textContent   = item.model + ' · ' + item.cat;
+  document.getElementById('field-hint').textContent  = 'Available: ' + fmt(stk) + ' pcs';
+  document.getElementById('modal-qty').value         = '';
+  document.getElementById('field-error').style.display = 'none';
+  document.getElementById('modal-overlay').classList.add('open');
+  setTimeout(() => document.getElementById('modal-qty').focus(), 80);
+}
+function closeModal() {
+  document.getElementById('modal-overlay').classList.remove('open');
+  activeId = null;
+}
+function validateQty() {
+  if (!activeId) return;
+  const item = items.find(x => x.id === activeId);
+  const val  = parseInt(document.getElementById('modal-qty').value) || 0;
+  document.getElementById('field-error').style.display = val > (item.recv - item.used) ? 'block' : 'none';
+}
+function confirmUse() {
+  if (!activeId) return;
+  const item  = items.find(x => x.id === activeId);
+  const qty   = parseInt(document.getElementById('modal-qty').value) || 0;
+  const avail = item.recv - item.used;
+  if (qty <= 0 || qty > avail) { document.getElementById('field-error').style.display = 'block'; return; }
+  item.used += qty;
+  log.unshift({ time: new Date().toISOString(), desc: item.desc, model: item.model, qty });
+  if (log.length > 200) log = log.slice(0, 200);
+  save(); render(); renderLog(); closeModal();
+  showToast('−' + fmt(qty) + ' · ' + item.desc);
+}
+
+function renderLog() {
+  const el = document.getElementById('log-body');
+  if (!log.length) { el.innerHTML = '<div class="log-empty">No usage recorded yet</div>'; return; }
+  el.innerHTML = log.slice(0, 50).map(e => {
+    const d = new Date(e.time);
+    const ts = d.toLocaleDateString('en-CA') + ' ' + d.toLocaleTimeString('en-CA', {hour:'2-digit', minute:'2-digit'});
+    return `<div class="log-row">
+      <span class="log-time">${ts}</span>
+      <span class="log-item">${e.desc} <span style="color:var(--text-light);font-family:'DM Mono',monospace;font-size:11px">${e.model}</span></span>
+      <span class="log-qty">−${fmt(e.qty)}</span>
+    </div>`;
+  }).join('');
+}
+
+function toggleLog() {
+  const p = document.getElementById('log-panel');
+  p.classList.toggle('open');
+  if (p.classList.contains('open')) renderLog();
+}
+function clearLog() {
+  if (!confirm('Clear the usage log?')) return;
+  log = []; save(); renderLog();
+}
+function resetData() {
+  if (!confirm('Reset all stock to original invoice quantities? This cannot be undone.')) return;
+  items = JSON.parse(JSON.stringify(DEFAULT_ITEMS));
+  log = []; save(); render(); renderLog();
+  showToast('Inventory reset to invoice quantities');
+}
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  clearTimeout(t._tid);
+  t._tid = setTimeout(() => t.classList.remove('show'), 2800);
+}
+
+document.getElementById('modal-overlay').addEventListener('click', function(e) {
+  if (e.target === this) closeModal();
+});
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closeModal();
+  if (e.key === 'Enter' && document.getElementById('modal-overlay').classList.contains('open')) confirmUse();
+});
+
+const d = new Date();
+document.getElementById('header-date').textContent =
+  d.toLocaleDateString('en-CA', {weekday:'short', year:'numeric', month:'short', day:'numeric'});
+
+load(); render();
+</script>
+</body>
+</html>
