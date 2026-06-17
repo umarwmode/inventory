@@ -3,273 +3,131 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>WeCafe — Inventory Tracker</title>
+<title>WeCafe — Inventory & Usage Log</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
-  :root {
-    --bg: #f7f6f2;
-    --surface: #ffffff;
-    --surface2: #f0ede6;
-    --border: #e2ddd6;
-    --text: #1a1816;
-    --text-muted: #7a746c;
-    --text-light: #b0a99f;
-    --accent: #1a1816;
-    --ok: #2d6a4f;
-    --ok-bg: #e8f5ee;
-    --warn: #7d4e00;
-    --warn-bg: #fff3cd;
-    --danger: #9b1d1d;
-    --danger-bg: #fce8e8;
-    --radius: 10px;
-    --radius-sm: 6px;
+  :root{
+    --bg:#f7f6f2; --surface:#ffffff; --surface2:#f0ede6; --border:#e2ddd6;
+    --text:#1a1816; --text-muted:#7a746c; --text-light:#b0a99f;
+    --accent:#1a1816;
+    --ok:#2d6a4f; --ok-bg:#e8f5ee;
+    --warn:#7d4e00; --warn-bg:#fff3cd;
+    --danger:#9b1d1d; --danger-bg:#fce8e8;
+    --sale:#1f3a5f; --sale-bg:#e8eef6;
+    --return:#5a3a78; --return-bg:#f0e9f6;
+    --radius:10px; --radius-sm:6px;
   }
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  body {
-    font-family: 'DM Sans', sans-serif;
-    background: var(--bg);
-    color: var(--text);
-    min-height: 100vh;
-    font-size: 14px;
-  }
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;font-size:14px;line-height:1.5}
+  .mono{font-family:'DM Mono',monospace}
+  .num{font-variant-numeric:tabular-nums}
 
-  /* ── Header ── */
-  header {
-    background: var(--accent);
-    color: #fff;
-    padding: 0 2rem;
-    height: 60px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    position: sticky;
-    top: 0;
-    z-index: 50;
-  }
-  .brand { display: flex; align-items: center; gap: 12px; }
-  .brand-icon {
-    width: 32px; height: 32px;
-    background: rgba(255,255,255,0.12);
-    border-radius: var(--radius-sm);
-    display: flex; align-items: center; justify-content: center;
-    font-size: 16px;
-  }
-  .brand-name { font-size: 16px; font-weight: 600; letter-spacing: -.3px; }
-  .brand-tag { font-size: 11px; opacity: .5; font-weight: 300; margin-left: 2px; }
-  .header-date { font-size: 12px; opacity: .45; font-family: 'DM Mono', monospace; }
+  /* Header */
+  header{background:var(--accent);color:#fff;height:60px;padding:0 1.5rem;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50}
+  .brand{display:flex;align-items:center;gap:12px}
+  .brand-icon{width:34px;height:34px;background:rgba(255,255,255,.12);border-radius:var(--radius-sm);display:flex;align-items:center;justify-content:center;font-size:18px}
+  .brand-name{font-size:16px;font-weight:700;letter-spacing:-.3px}
+  .brand-tag{font-size:11px;opacity:.5;font-weight:400;margin-left:2px}
+  .header-date{font-size:12px;opacity:.5;font-family:'DM Mono',monospace}
 
-  /* ── Main layout ── */
-  main { max-width: 1100px; margin: 0 auto; padding: 2rem 1.5rem 4rem; }
+  /* Tabs */
+  .tabs{background:var(--surface);border-bottom:1px solid var(--border);padding:0 1.5rem;display:flex;gap:4px;position:sticky;top:60px;z-index:40}
+  .tab{appearance:none;background:none;border:none;font-family:inherit;font-size:13px;font-weight:600;color:var(--text-muted);padding:14px 16px;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px}
+  .tab:hover{color:var(--text)}
+  .tab.active{color:var(--text);border-bottom-color:var(--accent)}
 
-  /* ── Stats row ── */
-  .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 2rem; }
-  .stat-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 1.1rem 1.25rem;
-  }
-  .stat-label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: .6px; margin-bottom: 6px; }
-  .stat-val { font-size: 28px; font-weight: 600; letter-spacing: -1px; line-height: 1; }
-  .stat-val.warn { color: var(--warn); }
-  .stat-val.danger { color: var(--danger); }
-  .stat-sub { font-size: 11px; color: var(--text-light); margin-top: 4px; }
+  main{max-width:1100px;margin:0 auto;padding:1.75rem 1.5rem 5rem}
+  .view{display:none}
+  .view.active{display:block}
 
-  /* ── Toolbar ── */
-  .toolbar {
-    display: flex; gap: 10px; margin-bottom: 1rem;
-    flex-wrap: wrap; align-items: center;
-  }
-  .search-wrap { position: relative; flex: 1; min-width: 200px; }
-  .search-wrap svg { position: absolute; left: 11px; top: 50%; transform: translateY(-50%); opacity: .35; pointer-events: none; }
-  .search-wrap input {
-    width: 100%; height: 38px; padding: 0 12px 0 36px;
-    border: 1px solid var(--border); border-radius: var(--radius-sm);
-    background: var(--surface); font-family: 'DM Sans', sans-serif;
-    font-size: 13px; color: var(--text); outline: none;
-    transition: border-color .15s;
-  }
-  .search-wrap input:focus { border-color: var(--accent); }
-  select {
-    height: 38px; padding: 0 12px; border: 1px solid var(--border);
-    border-radius: var(--radius-sm); background: var(--surface);
-    font-family: 'DM Sans', sans-serif; font-size: 13px;
-    color: var(--text); outline: none; cursor: pointer;
-    transition: border-color .15s;
-  }
-  select:focus { border-color: var(--accent); }
-  .toolbar-right { display: flex; gap: 8px; margin-left: auto; }
-  .btn-ghost {
-    height: 38px; padding: 0 14px;
-    border: 1px solid var(--border); border-radius: var(--radius-sm);
-    background: var(--surface); font-family: 'DM Sans', sans-serif;
-    font-size: 13px; color: var(--text); cursor: pointer;
-    display: flex; align-items: center; gap: 6px;
-    transition: background .15s, border-color .15s;
-  }
-  .btn-ghost:hover { background: var(--surface2); border-color: #ccc; }
+  /* Stats */
+  .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:1.75rem}
+  .stat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px 18px}
+  .stat-label{font-size:11px;text-transform:uppercase;letter-spacing:.6px;color:var(--text-muted);font-weight:600;margin-bottom:6px}
+  .stat-val{font-size:24px;font-weight:700;letter-spacing:-.5px}
+  .stat-val.warn{color:var(--warn)}
+  .stat-val.danger{color:var(--danger)}
 
-  /* ── Table ── */
-  .table-wrap {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    overflow: hidden;
-  }
-  table { width: 100%; border-collapse: collapse; }
-  thead tr { background: var(--surface2); }
-  th {
-    padding: 11px 14px; text-align: left;
-    font-size: 11px; font-weight: 600; color: var(--text-muted);
-    text-transform: uppercase; letter-spacing: .6px;
-    border-bottom: 1px solid var(--border);
-    white-space: nowrap;
-  }
-  th.num, td.num { text-align: right; }
-  td {
-    padding: 12px 14px; border-bottom: 1px solid var(--border);
-    color: var(--text); vertical-align: middle;
-    font-size: 13px;
-  }
-  tbody tr:last-child td { border-bottom: none; }
-  tbody tr { transition: background .1s; }
-  tbody tr:hover { background: #faf9f6; }
-  .item-name { font-weight: 500; font-size: 13px; }
-  .item-model { font-size: 11px; color: var(--text-light); font-family: 'DM Mono', monospace; margin-top: 2px; }
-  .stock-num { font-family: 'DM Mono', monospace; font-weight: 500; }
-  .stock-num.low { color: var(--warn); }
-  .stock-num.out { color: var(--danger); }
+  /* Cards / sections */
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
+  .card + .card{margin-top:1.5rem}
+  .card-head{padding:16px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+  .card-title{font-size:15px;font-weight:700;letter-spacing:-.2px}
+  .card-sub{font-size:12px;color:var(--text-muted);margin-top:2px}
 
-  /* ── Badges ── */
-  .badge {
-    display: inline-block; font-size: 11px; font-weight: 500;
-    padding: 3px 9px; border-radius: 20px; white-space: nowrap;
-  }
-  .badge-ok { background: var(--ok-bg); color: var(--ok); }
-  .badge-warn { background: var(--warn-bg); color: var(--warn); }
-  .badge-danger { background: var(--danger-bg); color: var(--danger); }
+  /* Tables */
+  table{width:100%;border-collapse:collapse;font-size:13px}
+  th{text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:var(--text-muted);font-weight:600;padding:10px 14px;border-bottom:1px solid var(--border);background:var(--surface2);white-space:nowrap}
+  td{padding:11px 14px;border-bottom:1px solid var(--border);vertical-align:middle}
+  tr:last-child td{border-bottom:none}
+  th.r,td.r{text-align:right}
+  .item-name{font-weight:600}
+  .item-meta{font-size:11px;color:var(--text-muted)}
 
-  /* ── Use button ── */
-  .use-btn {
-    height: 30px; padding: 0 12px;
-    border: 1px solid var(--border); border-radius: var(--radius-sm);
-    background: transparent; font-family: 'DM Sans', sans-serif;
-    font-size: 12px; color: var(--text); cursor: pointer;
-    display: inline-flex; align-items: center; gap: 5px;
-    transition: background .12s, border-color .12s;
-    white-space: nowrap;
-  }
-  .use-btn:hover:not(:disabled) { background: var(--surface2); border-color: #bbb; }
-  .use-btn:disabled { opacity: .35; cursor: not-allowed; }
-  .use-btn svg { flex-shrink: 0; }
+  .badge{display:inline-block;font-size:11px;font-weight:600;padding:3px 9px;border-radius:20px;white-space:nowrap}
+  .badge-ok{background:var(--ok-bg);color:var(--ok)}
+  .badge-warn{background:var(--warn-bg);color:var(--warn)}
+  .badge-danger{background:var(--danger-bg);color:var(--danger)}
+  .badge-sale{background:var(--sale-bg);color:var(--sale)}
+  .badge-return{background:var(--return-bg);color:var(--return)}
 
-  /* ── Empty ── */
-  .empty { padding: 3rem; text-align: center; color: var(--text-muted); font-size: 13px; }
-  .empty-icon { font-size: 28px; margin-bottom: 8px; opacity: .3; }
+  /* Forms */
+  .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;padding:18px}
+  .field{display:flex;flex-direction:column;gap:5px}
+  .field.full{grid-column:1 / -1}
+  label.fl{font-size:12px;font-weight:600;color:var(--text)}
+  .hint{font-size:11px;color:var(--text-muted)}
+  input,select{font-family:inherit;font-size:13px;color:var(--text);background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:9px 11px;width:100%}
+  input:focus,select:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 2px rgba(26,24,22,.08)}
 
-  /* ── Progress bar ── */
-  .progress-wrap { width: 80px; height: 4px; background: var(--surface2); border-radius: 4px; overflow: hidden; display: inline-block; vertical-align: middle; }
-  .progress-bar { height: 100%; border-radius: 4px; transition: width .3s; }
-  .progress-bar.ok { background: var(--ok); }
-  .progress-bar.warn { background: #e9a000; }
-  .progress-bar.danger { background: var(--danger); }
+  /* Line items */
+  .lines{padding:0 18px 4px}
+  .lines-head{font-size:12px;font-weight:600;margin:6px 0 8px}
+  .line-row{display:grid;grid-template-columns:1fr 110px 36px;gap:10px;margin-bottom:8px;align-items:center}
+  .line-stock{font-size:11px;color:var(--text-muted);grid-column:1 / -1;margin:-4px 0 4px}
+  .icon-btn{appearance:none;border:1px solid var(--border);background:var(--surface);border-radius:var(--radius-sm);width:36px;height:36px;cursor:pointer;font-size:16px;color:var(--text-muted);display:flex;align-items:center;justify-content:center}
+  .icon-btn:hover{background:var(--surface2);color:var(--danger)}
+  .add-line{appearance:none;background:none;border:1px dashed var(--border);color:var(--text-muted);font-family:inherit;font-size:12px;font-weight:600;padding:8px;border-radius:var(--radius-sm);cursor:pointer;width:100%;margin-bottom:6px}
+  .add-line:hover{border-color:var(--accent);color:var(--text)}
 
-  /* ── Modal ── */
-  .modal-overlay {
-    display: none; position: fixed; inset: 0;
-    background: rgba(26,24,22,.55); z-index: 200;
-    align-items: center; justify-content: center;
-    backdrop-filter: blur(2px);
-  }
-  .modal-overlay.open { display: flex; }
-  .modal {
-    background: var(--surface); border-radius: 14px;
-    border: 1px solid var(--border);
-    padding: 1.75rem; width: 400px; max-width: 92vw;
-    box-shadow: 0 20px 60px rgba(0,0,0,.15);
-    animation: popIn .18s ease;
-  }
-  @keyframes popIn { from { transform: scale(.95); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-  .modal-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 1.25rem; }
-  .modal-title { font-size: 15px; font-weight: 600; line-height: 1.3; }
-  .modal-sub { font-size: 12px; color: var(--text-muted); margin-top: 3px; }
-  .modal-close {
-    width: 28px; height: 28px; border: none; background: var(--surface2);
-    border-radius: 50%; cursor: pointer; display: flex; align-items: center;
-    justify-content: center; flex-shrink: 0; font-size: 16px; color: var(--text-muted);
-    transition: background .12s;
-  }
-  .modal-close:hover { background: var(--border); }
-  .field-label { font-size: 12px; font-weight: 500; color: var(--text-muted); margin-bottom: 6px; display: block; }
-  .modal input[type=number] {
-    width: 100%; height: 44px; padding: 0 14px;
-    border: 1.5px solid var(--border); border-radius: var(--radius-sm);
-    font-family: 'DM Mono', monospace; font-size: 18px; font-weight: 500;
-    color: var(--text); background: var(--bg); outline: none;
-    transition: border-color .15s;
-  }
-  .modal input[type=number]:focus { border-color: var(--accent); background: var(--surface); }
-  .field-hint { font-size: 11px; color: var(--text-light); margin-top: 5px; }
-  .field-error { font-size: 11px; color: var(--danger); margin-top: 5px; display: none; }
-  .modal-actions { display: flex; gap: 8px; margin-top: 1.5rem; justify-content: flex-end; }
-  .btn-cancel {
-    height: 40px; padding: 0 18px; border: 1px solid var(--border);
-    border-radius: var(--radius-sm); background: transparent;
-    font-family: 'DM Sans', sans-serif; font-size: 13px; color: var(--text);
-    cursor: pointer; transition: background .12s;
-  }
-  .btn-cancel:hover { background: var(--surface2); }
-  .btn-confirm {
-    height: 40px; padding: 0 22px; border: none;
-    border-radius: var(--radius-sm); background: var(--accent);
-    font-family: 'DM Sans', sans-serif; font-size: 13px; color: #fff;
-    cursor: pointer; font-weight: 500; transition: opacity .12s;
-  }
-  .btn-confirm:hover { opacity: .85; }
+  /* Type toggle */
+  .seg{display:inline-flex;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:3px;gap:3px}
+  .seg button{appearance:none;border:none;background:none;font-family:inherit;font-size:12px;font-weight:600;color:var(--text-muted);padding:7px 16px;border-radius:5px;cursor:pointer}
+  .seg button.on[data-type="sale"]{background:var(--sale);color:#fff}
+  .seg button.on[data-type="return"]{background:var(--return);color:#fff}
 
-  /* ── Toast ── */
-  .toast {
-    position: fixed; bottom: 1.5rem; left: 50%; transform: translateX(-50%);
-    background: var(--accent); color: #fff; font-size: 13px; font-family: 'DM Sans', sans-serif;
-    padding: 10px 20px; border-radius: 20px;
-    opacity: 0; transition: opacity .25s, transform .25s;
-    pointer-events: none; z-index: 300; white-space: nowrap;
-    transform: translateX(-50%) translateY(10px);
-  }
-  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  .form-actions{padding:14px 18px;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+  .form-err{color:var(--danger);font-size:12px;font-weight:600}
+  .btn{appearance:none;font-family:inherit;font-weight:600;font-size:13px;border-radius:var(--radius-sm);padding:10px 20px;cursor:pointer;border:1px solid transparent}
+  .btn-primary{background:var(--accent);color:#fff}
+  .btn-primary:hover{opacity:.9}
+  .btn-ghost{background:transparent;border-color:var(--border);color:var(--text)}
+  .btn-ghost:hover{background:var(--surface2)}
+  .btn-sm{padding:7px 13px;font-size:12px}
 
-  /* ── Log panel ── */
-  .log-panel {
-    margin-top: 2rem; background: var(--surface);
-    border: 1px solid var(--border); border-radius: var(--radius);
-    overflow: hidden; display: none;
-  }
-  .log-panel.open { display: block; }
-  .log-header {
-    padding: 12px 16px; background: var(--surface2);
-    border-bottom: 1px solid var(--border);
-    display: flex; align-items: center; justify-content: space-between;
-  }
-  .log-title { font-size: 12px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: .6px; }
-  .log-clear { font-size: 11px; color: var(--danger); cursor: pointer; background: none; border: none; font-family: 'DM Sans', sans-serif; }
-  .log-clear:hover { text-decoration: underline; }
-  .log-row {
-    display: flex; align-items: center; gap: 12px;
-    padding: 10px 16px; border-bottom: 1px solid var(--border);
-    font-size: 12px;
-  }
-  .log-row:last-child { border-bottom: none; }
-  .log-time { color: var(--text-light); font-family: 'DM Mono', monospace; flex-shrink: 0; }
-  .log-item { color: var(--text); flex: 1; }
-  .log-qty { font-family: 'DM Mono', monospace; font-weight: 500; color: var(--danger); flex-shrink: 0; }
-  .log-empty { padding: 1.5rem; text-align: center; color: var(--text-light); font-size: 12px; }
+  .log-items{display:flex;flex-direction:column;gap:2px}
+  .log-line{font-size:12px}
+  .log-line .q{color:var(--text-muted)}
+  .undo{appearance:none;background:none;border:none;color:var(--danger);font-family:inherit;font-size:12px;font-weight:600;cursor:pointer;padding:4px 6px;border-radius:5px}
+  .undo:hover{background:var(--danger-bg)}
 
-  @media (max-width: 700px) {
-    .stats { grid-template-columns: repeat(2, 1fr); }
-    th.hide-m, td.hide-m { display: none; }
-    main { padding: 1rem 1rem 3rem; }
-    header { padding: 0 1rem; }
+  .empty{text-align:center;padding:2.5rem 1rem;color:var(--text-muted);font-size:13px}
+  .empty strong{display:block;color:var(--text);font-size:14px;margin-bottom:4px}
+
+  .filter-row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+  .filter-row select,.filter-row input{width:auto;min-width:150px}
+
+  .toast{position:fixed;bottom:1.5rem;left:50%;transform:translateX(-50%);background:var(--accent);color:#fff;font-size:13px;font-weight:500;padding:11px 20px;border-radius:var(--radius-sm);opacity:0;transition:opacity .3s,transform .3s;pointer-events:none;z-index:200}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(-4px)}
+
+  @media (max-width:720px){
+    .stats{grid-template-columns:repeat(2,1fr)}
+    .form-grid{grid-template-columns:1fr}
+    .line-row{grid-template-columns:1fr 90px 36px}
+    .hide-sm{display:none}
+    main{padding:1.25rem 1rem 5rem}
   }
 </style>
 </head>
@@ -279,294 +137,446 @@
   <div class="brand">
     <div class="brand-icon">☕</div>
     <div>
-      <span class="brand-name">WeCafe</span>
-      <span class="brand-tag">/ Inventory</span>
+      <div class="brand-name">WeCafe <span class="brand-tag">/ Chocoberry</span></div>
     </div>
   </div>
   <div class="header-date" id="header-date"></div>
 </header>
 
+<nav class="tabs">
+  <button class="tab active" data-view="inventory">Inventory</button>
+  <button class="tab" data-view="usage">Usage Log</button>
+</nav>
+
 <main>
-  <div class="stats">
-    <div class="stat-card">
-      <div class="stat-label">Total SKUs</div>
-      <div class="stat-val" id="s-skus">—</div>
-      <div class="stat-sub">product lines</div>
+  <!-- ===================== INVENTORY ===================== -->
+  <section class="view active" id="view-inventory">
+    <div class="stats">
+      <div class="stat-card"><div class="stat-label">Total SKUs</div><div class="stat-val num" id="s-skus">—</div></div>
+      <div class="stat-card"><div class="stat-label">Pieces in Stock</div><div class="stat-val num" id="s-stock">—</div></div>
+      <div class="stat-card"><div class="stat-label">Units Sold</div><div class="stat-val num" id="s-sold">—</div></div>
+      <div class="stat-card"><div class="stat-label">Need Reorder</div><div class="stat-val num warn" id="s-reorder">—</div></div>
     </div>
-    <div class="stat-card">
-      <div class="stat-label">In Stock</div>
-      <div class="stat-val" id="s-stock">—</div>
-      <div class="stat-sub">total units</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-label">Reorder Soon</div>
-      <div class="stat-val warn" id="s-reorder">—</div>
-      <div class="stat-sub">items low</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-label">Out of Stock</div>
-      <div class="stat-val danger" id="s-out">—</div>
-      <div class="stat-sub">items empty</div>
-    </div>
-  </div>
 
-  <div class="toolbar">
-    <div class="search-wrap">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-      <input type="text" id="search" placeholder="Search items…" oninput="render()">
-    </div>
-    <select id="cat-filter" onchange="render()">
-      <option value="">All categories</option>
-      <option>Cups</option><option>Lids</option><option>Bags</option>
-      <option>Bowls</option><option>Boxes</option><option>Cans</option><option>Equipment</option>
-    </select>
-    <select id="status-filter" onchange="render()">
-      <option value="">All statuses</option>
-      <option>OK</option><option>Reorder Now</option><option>Out of Stock</option>
-    </select>
-    <div class="toolbar-right">
-      <button class="btn-ghost" onclick="toggleLog()">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
-        Usage Log
-      </button>
-      <button class="btn-ghost" onclick="resetData()">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.61"/></svg>
-        Reset
-      </button>
-    </div>
-  </div>
-
-  <div class="table-wrap">
-    <table>
-      <thead>
-        <tr>
-          <th>Item</th>
-          <th class="hide-m">Category</th>
-          <th class="num">Received</th>
-          <th class="num">Used</th>
-          <th class="num">In Stock</th>
-          <th class="hide-m">Level</th>
-          <th>Status</th>
-          <th></th>
-        </tr>
-      </thead>
-      <tbody id="tbody"></tbody>
-    </table>
-  </div>
-
-  <div class="log-panel" id="log-panel">
-    <div class="log-header">
-      <span class="log-title">Usage Log</span>
-      <button class="log-clear" onclick="clearLog()">Clear log</button>
-    </div>
-    <div id="log-body"></div>
-  </div>
-</main>
-
-<!-- Modal -->
-<div class="modal-overlay" id="modal-overlay">
-  <div class="modal">
-    <div class="modal-header">
-      <div>
-        <div class="modal-title" id="modal-title">Record usage</div>
-        <div class="modal-sub" id="modal-sub"></div>
+    <div class="card">
+      <div class="card-head">
+        <div>
+          <div class="card-title">Current Inventory</div>
+          <div class="card-sub">Stock updates automatically from the Usage Log</div>
+        </div>
+        <div class="filter-row">
+          <select id="inv-cat"><option value="">All categories</option></select>
+        </div>
       </div>
-      <button class="modal-close" onclick="closeModal()">✕</button>
+      <div style="overflow-x:auto">
+        <table>
+          <thead>
+            <tr>
+              <th>Item</th><th class="hide-sm">Category</th>
+              <th class="r">Received</th><th class="r">Sold</th>
+              <th class="r">Returned</th><th class="r">In Stock</th><th>Status</th>
+            </tr>
+          </thead>
+          <tbody id="inv-body"></tbody>
+        </table>
+      </div>
     </div>
-    <label class="field-label" for="modal-qty">Quantity used / sold</label>
-    <input type="number" id="modal-qty" min="1" placeholder="0" oninput="validateQty()">
-    <div class="field-hint" id="field-hint"></div>
-    <div class="field-error" id="field-error">Cannot exceed current stock</div>
-    <div class="modal-actions">
-      <button class="btn-cancel" onclick="closeModal()">Cancel</button>
-      <button class="btn-confirm" onclick="confirmUse()">Confirm</button>
+  </section>
+
+  <!-- ===================== USAGE LOG ===================== -->
+  <section class="view" id="view-usage">
+    <div class="card">
+      <div class="card-head">
+        <div>
+          <div class="card-title">Record a transaction</div>
+          <div class="card-sub">Log items sold to a franchisee, or returned back into stock</div>
+        </div>
+        <div class="seg" id="type-seg">
+          <button data-type="sale" class="on">Sold to franchisee</button>
+          <button data-type="return">Returned to stock</button>
+        </div>
+      </div>
+
+      <div class="form-grid">
+        <div class="field">
+          <label class="fl" for="f-date">Date</label>
+          <input type="date" id="f-date">
+        </div>
+        <div class="field">
+          <label class="fl" for="f-franchisee">Franchisee location</label>
+          <input type="text" id="f-franchisee" list="franchisee-list" placeholder="e.g. Chocoberry Westhills" autocomplete="off">
+          <datalist id="franchisee-list"></datalist>
+        </div>
+        <div class="field full">
+          <label class="fl" for="f-delivery">Delivered / handled by</label>
+          <input type="text" id="f-delivery" list="delivery-list" placeholder="e.g. Bilal" autocomplete="off">
+          <datalist id="delivery-list"></datalist>
+        </div>
+      </div>
+
+      <div class="lines">
+        <div class="lines-head" id="lines-head">Items sold</div>
+        <div id="line-rows"></div>
+        <button class="add-line" id="add-line" type="button">+ Add another item</button>
+      </div>
+
+      <div class="form-actions">
+        <span class="form-err" id="form-err"></span>
+        <div style="display:flex;gap:8px;margin-left:auto">
+          <button class="btn btn-ghost" id="btn-reset" type="button">Clear</button>
+          <button class="btn btn-primary" id="btn-save" type="button">Record sale</button>
+        </div>
+      </div>
     </div>
-  </div>
-</div>
+
+    <div class="card">
+      <div class="card-head">
+        <div>
+          <div class="card-title">Transaction history</div>
+          <div class="card-sub" id="log-count">No transactions yet</div>
+        </div>
+        <div class="filter-row">
+          <select id="log-filter"><option value="">All franchisees</option></select>
+          <button class="btn btn-ghost btn-sm" id="btn-csv" type="button">Download CSV</button>
+        </div>
+      </div>
+      <div style="overflow-x:auto">
+        <table>
+          <thead>
+            <tr>
+              <th>Date</th><th>Type</th><th>Franchisee</th>
+              <th class="hide-sm">Handled by</th><th>Items</th><th></th>
+            </tr>
+          </thead>
+          <tbody id="log-body"></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+</main>
 
 <div class="toast" id="toast"></div>
 
 <script>
+/* ---------------- Default catalogue (from invoice 25YOON-CA32-W03) ---------------- */
 const DEFAULT_ITEMS = [
-  {id:1,  model:"12oz",          desc:"Double Wall Paper Cup",          cat:"Cups",      recv:14000, used:0, reorder:1400},
-  {id:2,  model:"16oz",          desc:"Double Wall Paper Cup",          cat:"Cups",      recv:17000, used:0, reorder:1700},
-  {id:3,  model:"90mm",          desc:"PLA Compostable Lid",            cat:"Lids",      recv:31000, used:0, reorder:3100},
-  {id:4,  model:"12oz",          desc:"PET Plastic Cup",                cat:"Cups",      recv:10000, used:0, reorder:1000},
-  {id:5,  model:"16oz",          desc:"PET Plastic Cup",                cat:"Cups",      recv:5000,  used:0, reorder:500},
-  {id:6,  model:"92mm",          desc:"Strawless Lid",                  cat:"Lids",      recv:10000, used:0, reorder:1000},
-  {id:7,  model:"98mm",          desc:"Strawless Lid",                  cat:"Lids",      recv:10000, used:0, reorder:1000},
-  {id:8,  model:"29×25.5×13cm",  desc:"Paper Bag",                      cat:"Bags",      recv:9000,  used:0, reorder:900},
-  {id:9,  model:"12oz",          desc:"Paper Bowl",                     cat:"Bowls",     recv:10000, used:0, reorder:1000},
-  {id:10, model:"98mm",          desc:"Dome Lid for 12oz Paper Bowl",   cat:"Lids",      recv:9900,  used:0, reorder:990},
-  {id:11, model:"17.3×10×6cm",   desc:"Brownie Box (Inside & Outside)", cat:"Boxes",     recv:9900,  used:0, reorder:990},
-  {id:12, model:"12×11.5cm",     desc:"Croffle Box (Inside & Outside)", cat:"Boxes",     recv:9700,  used:0, reorder:970},
-  {id:13, model:"27×14×6cm",     desc:"Paper Box with Cup Holder",      cat:"Boxes",     recv:20000, used:0, reorder:2000},
-  {id:14, model:"350ml",         desc:"PET Plastic Can",                cat:"Cans",      recv:10000, used:0, reorder:1000},
-  {id:15, model:"220×400×600mm", desc:"Can Sealing Machine",            cat:"Equipment", recv:1,     used:0, reorder:1},
+  {id:1,  model:"12oz",          desc:"Double Wall Paper Cup",        cat:"Cups",      recv:14000, used:0, reorder:1400},
+  {id:2,  model:"16oz",          desc:"Double Wall Paper Cup",        cat:"Cups",      recv:17000, used:0, reorder:1700},
+  {id:3,  model:"90mm",          desc:"PLA Compostable Lid",          cat:"Lids",      recv:31000, used:0, reorder:3100},
+  {id:4,  model:"12oz",          desc:"PET Plastic Cup",              cat:"Cups",      recv:10000, used:0, reorder:1000},
+  {id:5,  model:"16oz",          desc:"PET Plastic Cup",              cat:"Cups",      recv:5000,  used:0, reorder:500},
+  {id:6,  model:"92mm",          desc:"Strawless Lid",                cat:"Lids",      recv:10000, used:0, reorder:1000},
+  {id:7,  model:"98mm",          desc:"Strawless Lid",                cat:"Lids",      recv:10000, used:0, reorder:1000},
+  {id:8,  model:"29×25.5×13cm",  desc:"Paper Bag",                    cat:"Bags",      recv:9000,  used:0, reorder:900},
+  {id:9,  model:"12oz",          desc:"Paper Bowl",                   cat:"Bowls",     recv:10000, used:0, reorder:1000},
+  {id:10, model:"98mm",          desc:"Dome Lid for 12oz Paper Bowl", cat:"Lids",      recv:9900,  used:0, reorder:990},
+  {id:11, model:"17.3×10×6cm",   desc:"Brownie Box (In & Out)",       cat:"Boxes",     recv:9900,  used:0, reorder:990},
+  {id:12, model:"12×11.5cm",     desc:"Croffle Box (In & Out)",       cat:"Boxes",     recv:9700,  used:0, reorder:970},
+  {id:13, model:"27×14×6cm",     desc:"Paper Box with Cup Holder",    cat:"Boxes",     recv:20000, used:0, reorder:2000},
+  {id:14, model:"350ml",         desc:"PET Plastic Can",              cat:"Cans",      recv:10000, used:0, reorder:1000},
+  {id:15, model:"220×400×600mm", desc:"Can Sealing Machine",          cat:"Equipment", recv:1,     used:0, reorder:1},
 ];
 
-let items = [], log = [], activeId = null;
-const KEY_INV = 'wecafe_inv_v1', KEY_LOG = 'wecafe_log_v1';
+/* ---------------- State + storage (with safe fallback) ---------------- */
+const K_INV = 'wecafe_inv', K_LOG = 'wecafe_log';
+let mem = {};                       // in-memory fallback if storage is blocked
+let items = [], log = [], txType = 'sale';
 
-function load() {
-  try { items = JSON.parse(localStorage.getItem(KEY_INV)) || JSON.parse(JSON.stringify(DEFAULT_ITEMS)); } 
-  catch(e) { items = JSON.parse(JSON.stringify(DEFAULT_ITEMS)); }
-  try { log = JSON.parse(localStorage.getItem(KEY_LOG)) || []; } 
-  catch(e) { log = []; }
+function store(key, val){
+  try{ localStorage.setItem(key, JSON.stringify(val)); }
+  catch(e){ mem[key] = JSON.stringify(val); }
 }
-function save() {
-  localStorage.setItem(KEY_INV, JSON.stringify(items));
-  localStorage.setItem(KEY_LOG, JSON.stringify(log));
+function fetchStore(key){
+  try{ const r = localStorage.getItem(key); if(r!=null) return JSON.parse(r); }
+  catch(e){}
+  return mem[key] ? JSON.parse(mem[key]) : null;
 }
-function status(item) {
-  const s = item.recv - item.used;
-  if (s <= 0) return 'Out of Stock';
-  if (s <= item.reorder) return 'Reorder Now';
-  return 'OK';
-}
-function fmt(n) { return Number(n).toLocaleString('en-CA'); }
-function pct(item) { return Math.max(0, Math.min(100, Math.round((item.recv - item.used) / item.recv * 100))); }
-
-function updateStats() {
-  const statuses = items.map(status);
-  document.getElementById('s-skus').textContent    = items.length;
-  document.getElementById('s-stock').textContent   = fmt(items.reduce((a,x) => a + Math.max(0, x.recv - x.used), 0));
-  document.getElementById('s-reorder').textContent = statuses.filter(s => s === 'Reorder Now').length;
-  document.getElementById('s-out').textContent     = statuses.filter(s => s === 'Out of Stock').length;
-}
-
-function render() {
-  const q   = document.getElementById('search').value.toLowerCase();
-  const cat = document.getElementById('cat-filter').value;
-  const sf  = document.getElementById('status-filter').value;
-  const filtered = items.filter(x => {
-    const s = status(x);
-    return (!q  || x.desc.toLowerCase().includes(q) || x.model.toLowerCase().includes(q) || x.cat.toLowerCase().includes(q))
-        && (!cat || x.cat === cat)
-        && (!sf  || s === sf);
-  });
-  const tbody = document.getElementById('tbody');
-  if (!filtered.length) {
-    tbody.innerHTML = '<tr><td colspan="8"><div class="empty"><div class="empty-icon">📭</div>No items match your filters</div></td></tr>';
-    updateStats(); return;
+function load(){
+  const savedItems = fetchStore(K_INV);
+  if(savedItems && Array.isArray(savedItems)){
+    // merge: keep any newly added default items, preserve saved usage
+    items = DEFAULT_ITEMS.map(d=>{
+      const s = savedItems.find(x=>x.id===d.id);
+      return s ? {...d, used:s.used, recv:s.recv} : {...d};
+    });
+  } else {
+    items = DEFAULT_ITEMS.map(x=>({...x}));
   }
-  tbody.innerHTML = filtered.map(x => {
-    const st  = status(x);
-    const stk = Math.max(0, x.recv - x.used);
-    const p   = pct(x);
-    const stClass = st === 'OK' ? 'ok' : st === 'Reorder Now' ? 'warn' : 'danger';
-    const bdgClass = st === 'OK' ? 'badge-ok' : st === 'Reorder Now' ? 'badge-warn' : 'badge-danger';
-    const numClass = st === 'OK' ? '' : st === 'Reorder Now' ? 'low' : 'out';
+  // ensure per-item returned tally exists
+  items.forEach(i=>{ if(typeof i.returned!=='number') i.returned=0; if(typeof i.sold!=='number') i.sold = i.used; });
+  log = fetchStore(K_LOG) || [];
+  recomputeFromLog();
+}
+function save(){ store(K_INV, items); store(K_LOG, log); }
+
+/* Derive sold / returned / used straight from the log so it's always consistent */
+function recomputeFromLog(){
+  items.forEach(i=>{ i.sold=0; i.returned=0; });
+  log.forEach(t=>{
+    t.lines.forEach(l=>{
+      const it = items.find(x=>x.id===l.itemId);
+      if(!it) return;
+      if(t.type==='sale')   it.sold += l.qty;
+      else                  it.returned += l.qty;
+    });
+  });
+  items.forEach(i=>{ i.used = i.sold - i.returned; });
+}
+
+/* ---------------- Helpers ---------------- */
+const fmt = n => (n==null?'—':Number(n).toLocaleString());
+const stockOf = i => i.recv - i.used;
+function statusOf(i){
+  const s = stockOf(i);
+  if(s<=0) return {label:'Out of stock', cls:'badge-danger'};
+  if(s<=i.reorder) return {label:'Reorder now', cls:'badge-warn'};
+  return {label:'OK', cls:'badge-ok'};
+}
+function showToast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.classList.add('show');
+  clearTimeout(t._t); t._t=setTimeout(()=>t.classList.remove('show'),2600);
+}
+function esc(s){ return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+function prettyDate(d){
+  const dt=new Date(d+'T00:00:00');
+  if(isNaN(dt)) return d;
+  return dt.toLocaleDateString('en-CA',{year:'numeric',month:'short',day:'numeric'});
+}
+
+/* ---------------- Inventory view ---------------- */
+function renderInventory(){
+  const catSel=document.getElementById('inv-cat');
+  const cats=[...new Set(items.map(i=>i.cat))];
+  if(catSel.options.length<=1){
+    cats.forEach(c=>{const o=document.createElement('option');o.value=c;o.textContent=c;catSel.appendChild(o);});
+  }
+  const filter=catSel.value;
+  const body=document.getElementById('inv-body');
+  body.innerHTML=items.filter(i=>!filter||i.cat===filter).map(i=>{
+    const st=statusOf(i), s=stockOf(i);
     return `<tr>
-      <td>
-        <div class="item-name">${x.desc}</div>
-        <div class="item-model">${x.model}</div>
-      </td>
-      <td class="hide-m" style="color:var(--text-muted);font-size:12px">${x.cat}</td>
-      <td class="num" style="font-family:'DM Mono',monospace;color:var(--text-muted)">${fmt(x.recv)}</td>
-      <td class="num" style="font-family:'DM Mono',monospace;color:var(--text-muted)">${fmt(x.used)}</td>
-      <td class="num"><span class="stock-num ${numClass}">${fmt(stk)}</span></td>
-      <td class="hide-m">
-        <div class="progress-wrap">
-          <div class="progress-bar ${stClass}" style="width:${p}%"></div>
-        </div>
-      </td>
-      <td><span class="badge ${bdgClass}">${st}</span></td>
-      <td>
-        <button class="use-btn" onclick="openModal(${x.id})" ${stk <= 0 ? 'disabled' : ''}>
-          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"/></svg>
-          Use
-        </button>
-      </td>
+      <td><div class="item-name">${esc(i.desc)}</div><div class="item-meta">${esc(i.model)}</div></td>
+      <td class="hide-sm">${esc(i.cat)}</td>
+      <td class="r num">${fmt(i.recv)}</td>
+      <td class="r num">${fmt(i.sold)}</td>
+      <td class="r num">${fmt(i.returned)}</td>
+      <td class="r num" style="font-weight:700">${fmt(Math.max(0,s))}</td>
+      <td><span class="badge ${st.cls}">${st.label}</span></td>
     </tr>`;
   }).join('');
-  updateStats();
+
+  document.getElementById('s-skus').textContent=fmt(items.length);
+  document.getElementById('s-stock').textContent=fmt(items.reduce((a,i)=>a+Math.max(0,stockOf(i)),0));
+  document.getElementById('s-sold').textContent=fmt(items.reduce((a,i)=>a+i.sold,0));
+  const reorderCount=items.filter(i=>stockOf(i)<=i.reorder).length;
+  const rc=document.getElementById('s-reorder');
+  rc.textContent=fmt(reorderCount);
+  rc.className='stat-val num '+(reorderCount>0?'warn':'');
 }
 
-function openModal(id) {
-  activeId = id;
-  const item = items.find(x => x.id === id);
-  const stk  = item.recv - item.used;
-  document.getElementById('modal-title').textContent = item.desc;
-  document.getElementById('modal-sub').textContent   = item.model + ' · ' + item.cat;
-  document.getElementById('field-hint').textContent  = 'Available: ' + fmt(stk) + ' pcs';
-  document.getElementById('modal-qty').value         = '';
-  document.getElementById('field-error').style.display = 'none';
-  document.getElementById('modal-overlay').classList.add('open');
-  setTimeout(() => document.getElementById('modal-qty').focus(), 80);
-}
-function closeModal() {
-  document.getElementById('modal-overlay').classList.remove('open');
-  activeId = null;
-}
-function validateQty() {
-  if (!activeId) return;
-  const item = items.find(x => x.id === activeId);
-  const val  = parseInt(document.getElementById('modal-qty').value) || 0;
-  document.getElementById('field-error').style.display = val > (item.recv - item.used) ? 'block' : 'none';
-}
-function confirmUse() {
-  if (!activeId) return;
-  const item  = items.find(x => x.id === activeId);
-  const qty   = parseInt(document.getElementById('modal-qty').value) || 0;
-  const avail = item.recv - item.used;
-  if (qty <= 0 || qty > avail) { document.getElementById('field-error').style.display = 'block'; return; }
-  item.used += qty;
-  log.unshift({ time: new Date().toISOString(), desc: item.desc, model: item.model, qty });
-  if (log.length > 200) log = log.slice(0, 200);
-  save(); render(); renderLog(); closeModal();
-  showToast('−' + fmt(qty) + ' · ' + item.desc);
-}
-
-function renderLog() {
-  const el = document.getElementById('log-body');
-  if (!log.length) { el.innerHTML = '<div class="log-empty">No usage recorded yet</div>'; return; }
-  el.innerHTML = log.slice(0, 50).map(e => {
-    const d = new Date(e.time);
-    const ts = d.toLocaleDateString('en-CA') + ' ' + d.toLocaleTimeString('en-CA', {hour:'2-digit', minute:'2-digit'});
-    return `<div class="log-row">
-      <span class="log-time">${ts}</span>
-      <span class="log-item">${e.desc} <span style="color:var(--text-light);font-family:'DM Mono',monospace;font-size:11px">${e.model}</span></span>
-      <span class="log-qty">−${fmt(e.qty)}</span>
-    </div>`;
+/* ---------------- Usage log: transaction form ---------------- */
+function itemOptions(selectedId){
+  return items.map(i=>{
+    const s=Math.max(0,stockOf(i));
+    return `<option value="${i.id}" ${i.id==selectedId?'selected':''}>${esc(i.desc)} — ${esc(i.model)} (${fmt(s)} in stock)</option>`;
   }).join('');
 }
+function addLineRow(selId){
+  const wrap=document.getElementById('line-rows');
+  const row=document.createElement('div');
+  row.className='line-row';
+  row.innerHTML=`
+    <select class="line-item">${itemOptions(selId)}</select>
+    <input type="number" class="line-qty" min="1" placeholder="Qty">
+    <button class="icon-btn line-del" type="button" title="Remove">✕</button>`;
+  wrap.appendChild(row);
+  row.querySelector('.line-del').addEventListener('click',()=>{
+    if(document.querySelectorAll('.line-row').length>1) row.remove();
+    else { row.querySelector('.line-qty').value=''; }
+    clearErr();
+  });
+  row.querySelector('.line-qty').addEventListener('input',clearErr);
+  row.querySelector('.line-item').addEventListener('change',clearErr);
+}
+function resetForm(){
+  document.getElementById('f-date').valueAsDate=new Date();
+  document.getElementById('f-franchisee').value='';
+  document.getElementById('f-delivery').value='';
+  document.getElementById('line-rows').innerHTML='';
+  addLineRow();
+  clearErr();
+}
+function clearErr(){ document.getElementById('form-err').textContent=''; }
+function setErr(m){ document.getElementById('form-err').textContent=m; }
 
-function toggleLog() {
-  const p = document.getElementById('log-panel');
-  p.classList.toggle('open');
-  if (p.classList.contains('open')) renderLog();
-}
-function clearLog() {
-  if (!confirm('Clear the usage log?')) return;
-  log = []; save(); renderLog();
-}
-function resetData() {
-  if (!confirm('Reset all stock to original invoice quantities? This cannot be undone.')) return;
-  items = JSON.parse(JSON.stringify(DEFAULT_ITEMS));
-  log = []; save(); render(); renderLog();
-  showToast('Inventory reset to invoice quantities');
-}
-function showToast(msg) {
-  const t = document.getElementById('toast');
-  t.textContent = msg; t.classList.add('show');
-  clearTimeout(t._tid);
-  t._tid = setTimeout(() => t.classList.remove('show'), 2800);
+function setType(t){
+  txType=t;
+  document.querySelectorAll('#type-seg button').forEach(b=>b.classList.toggle('on',b.dataset.type===t));
+  document.getElementById('lines-head').textContent = t==='sale' ? 'Items sold' : 'Items returned';
+  document.getElementById('btn-save').textContent  = t==='sale' ? 'Record sale' : 'Record return';
+  // refresh stock hints in dropdowns
+  document.querySelectorAll('.line-item').forEach(sel=>{
+    const cur=sel.value; sel.innerHTML=itemOptions(cur);
+  });
 }
 
-document.getElementById('modal-overlay').addEventListener('click', function(e) {
-  if (e.target === this) closeModal();
+function recordTransaction(){
+  clearErr();
+  const date=document.getElementById('f-date').value;
+  const franchisee=document.getElementById('f-franchisee').value.trim();
+  const delivery=document.getElementById('f-delivery').value.trim();
+
+  if(!date){ setErr('Pick a date.'); return; }
+  if(!franchisee){ setErr('Enter the franchisee location.'); return; }
+
+  // gather lines
+  const rows=[...document.querySelectorAll('.line-row')];
+  const lines=[]; const seen={};
+  for(const r of rows){
+    const id=parseInt(r.querySelector('.line-item').value);
+    const qty=parseInt(r.querySelector('.line-qty').value)||0;
+    if(qty<=0) continue;
+    seen[id]=(seen[id]||0)+qty;
+  }
+  for(const id in seen) lines.push({itemId:parseInt(id),qty:seen[id]});
+  if(lines.length===0){ setErr('Add at least one item with a quantity.'); return; }
+
+  // validate against stock
+  if(txType==='sale'){
+    for(const l of lines){
+      const it=items.find(x=>x.id===l.itemId);
+      const avail=Math.max(0,stockOf(it));
+      if(l.qty>avail){ setErr(`Only ${fmt(avail)} of "${it.desc} ${it.model}" in stock.`); return; }
+    }
+  } else {
+    // a return cannot push returned above what was ever sold
+    for(const l of lines){
+      const it=items.find(x=>x.id===l.itemId);
+      const maxReturn=it.sold - it.returned;
+      if(l.qty>maxReturn){ setErr(`Can't return ${fmt(l.qty)} of "${it.desc} ${it.model}" — only ${fmt(Math.max(0,maxReturn))} are out with franchisees.`); return; }
+    }
+  }
+
+  log.unshift({
+    id: Date.now(),
+    date, type: txType,
+    franchisee, delivery,
+    lines
+  });
+  recomputeFromLog(); save();
+  renderAll();
+  resetForm();
+  const total=lines.reduce((a,l)=>a+l.qty,0);
+  showToast(txType==='sale'
+    ? `Recorded ${fmt(total)} pcs sold to ${franchisee}`
+    : `Returned ${fmt(total)} pcs to stock from ${franchisee}`);
+}
+
+function deleteTransaction(id){
+  const t=log.find(x=>x.id===id); if(!t) return;
+  const verb=t.type==='sale'?'sale':'return';
+  if(!confirm(`Delete this ${verb} for ${t.franchisee}? Stock will be adjusted back.`)) return;
+  log=log.filter(x=>x.id!==id);
+  recomputeFromLog(); save(); renderAll();
+  showToast('Transaction removed');
+}
+
+/* ---------------- Usage log: history table ---------------- */
+function renderLog(){
+  const filterSel=document.getElementById('log-filter');
+  const franchisees=[...new Set(log.map(t=>t.franchisee))].sort();
+  const cur=filterSel.value;
+  filterSel.innerHTML='<option value="">All franchisees</option>'+
+    franchisees.map(f=>`<option value="${esc(f)}" ${f===cur?'selected':''}>${esc(f)}</option>`).join('');
+
+  // datalists
+  document.getElementById('franchisee-list').innerHTML=franchisees.map(f=>`<option value="${esc(f)}">`).join('');
+  const people=[...new Set(log.map(t=>t.delivery).filter(Boolean))].sort();
+  document.getElementById('delivery-list').innerHTML=people.map(p=>`<option value="${esc(p)}">`).join('');
+
+  const filter=filterSel.value;
+  const rows=log.filter(t=>!filter||t.franchisee===filter);
+  const body=document.getElementById('log-body');
+
+  if(rows.length===0){
+    body.innerHTML=`<tr><td colspan="6"><div class="empty"><strong>No transactions ${filter?'for this franchisee':'yet'}</strong>Record a sale or return above and it will appear here.</div></td></tr>`;
+  } else {
+    body.innerHTML=rows.map(t=>{
+      const lineHtml=t.lines.map(l=>{
+        const it=items.find(x=>x.id===l.itemId);
+        const name=it?`${it.desc} ${it.model}`:'Unknown item';
+        return `<div class="log-line">${esc(name)} <span class="q num">×${fmt(l.qty)}</span></div>`;
+      }).join('');
+      const badge=t.type==='sale'
+        ?'<span class="badge badge-sale">Sold</span>'
+        :'<span class="badge badge-return">Returned</span>';
+      return `<tr>
+        <td class="num">${prettyDate(t.date)}</td>
+        <td>${badge}</td>
+        <td>${esc(t.franchisee)}</td>
+        <td class="hide-sm">${esc(t.delivery||'—')}</td>
+        <td><div class="log-items">${lineHtml}</div></td>
+        <td class="r"><button class="undo" onclick="deleteTransaction(${t.id})">Delete</button></td>
+      </tr>`;
+    }).join('');
+  }
+
+  const totalTx=log.length;
+  const totalSold=log.filter(t=>t.type==='sale').reduce((a,t)=>a+t.lines.reduce((b,l)=>b+l.qty,0),0);
+  const totalRet=log.filter(t=>t.type==='return').reduce((a,t)=>a+t.lines.reduce((b,l)=>b+l.qty,0),0);
+  document.getElementById('log-count').textContent =
+    totalTx===0?'No transactions yet'
+    :`${totalTx} transaction${totalTx>1?'s':''} · ${fmt(totalSold)} sold · ${fmt(totalRet)} returned`;
+}
+
+/* ---------------- CSV export ---------------- */
+function exportCSV(){
+  if(log.length===0){ showToast('Nothing to export yet'); return; }
+  const head=['Date','Type','Franchisee','Handled by','Item','Model','Quantity'];
+  const rows=[head];
+  log.slice().reverse().forEach(t=>{
+    t.lines.forEach(l=>{
+      const it=items.find(x=>x.id===l.itemId)||{};
+      rows.push([t.date, t.type==='sale'?'Sold':'Returned', t.franchisee, t.delivery||'', it.desc||'', it.model||'', l.qty]);
+    });
+  });
+  const csv=rows.map(r=>r.map(c=>{
+    c=String(c); return /[",\n]/.test(c)?'"'+c.replace(/"/g,'""')+'"':c;
+  }).join(',')).join('\n');
+  const blob=new Blob([csv],{type:'text/csv'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download='wecafe-usage-log.csv';
+  a.click(); URL.revokeObjectURL(a.href);
+  showToast('CSV downloaded');
+}
+
+/* ---------------- Wiring ---------------- */
+function renderAll(){ renderInventory(); renderLog(); }
+
+document.querySelectorAll('.tab').forEach(tab=>{
+  tab.addEventListener('click',()=>{
+    document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+    document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+    tab.classList.add('active');
+    document.getElementById('view-'+tab.dataset.view).classList.add('active');
+  });
 });
-document.addEventListener('keydown', e => {
-  if (e.key === 'Escape') closeModal();
-  if (e.key === 'Enter' && document.getElementById('modal-overlay').classList.contains('open')) confirmUse();
-});
+document.querySelectorAll('#type-seg button').forEach(b=>b.addEventListener('click',()=>setType(b.dataset.type)));
+document.getElementById('add-line').addEventListener('click',()=>addLineRow());
+document.getElementById('btn-save').addEventListener('click',recordTransaction);
+document.getElementById('btn-reset').addEventListener('click',resetForm);
+document.getElementById('btn-csv').addEventListener('click',exportCSV);
+document.getElementById('inv-cat').addEventListener('change',renderInventory);
+document.getElementById('log-filter').addEventListener('change',renderLog);
 
-const d = new Date();
-document.getElementById('header-date').textContent =
-  d.toLocaleDateString('en-CA', {weekday:'short', year:'numeric', month:'short', day:'numeric'});
+document.getElementById('header-date').textContent=
+  new Date().toLocaleDateString('en-CA',{weekday:'short',year:'numeric',month:'short',day:'numeric'});
 
-load(); render();
+load();
+resetForm();
+renderAll();
 </script>
 </body>
 </html>
